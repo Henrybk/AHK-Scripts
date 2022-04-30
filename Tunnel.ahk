@@ -1,13 +1,13 @@
 ﻿/*
 
-###########################
-Tunnel v0.92              #
-By Henrybk                #
-###########################
-
-##################################
-Licensed Under MIT License	     #
-##################################
+########################### 
+Tunnel v0.92              # 
+By Henrybk                # 
+########################### 
+ 
+################################## 
+Licensed Under MIT License	     # 
+################################## 
 
 */
 
@@ -162,6 +162,84 @@ class Tunnel {
 		}
 	}
 	
+	getvar(var_name, timer, retry) {
+		StringToSend := this.myScriptName . separator . "getvar" . separator . var_name . separator . "nill" ;
+		this.answer_getvar := 0 ;
+		time_Now := A_TickCount ;
+		time_Max := time_Now + timer ;
+		tried := 0 ;
+		while (1) {
+			if (retry = 1 or tried = 0) {
+				SendToScript(1, 0x004A, StringToSend, this.targetScriptName)
+				tried := 1 ;
+			}
+			sleep, 50
+			if (this.answer_getvar = 1) {
+				this.answer_getvar := 0 ;
+				result := this.answer_getvar_content ;
+				this.answer_getvar_content := 0 ;
+				return result ;
+			} else {
+				time_Now := A_TickCount ;
+				if (time_Now > time_Max) {
+					return "FAIL" ;
+				}
+			}
+		}
+	}
+	
+	isPaused(timer, retry) {
+		StringToSend := this.myScriptName . separator . "isPaused" . separator . "nill" . separator . "nill" ;
+		this.answer_isPaused := 0 ;
+		time_Now := A_TickCount ;
+		time_Max := time_Now + timer ;
+		tried := 0 ;
+		while (1) {
+			if (retry = 1 or tried = 0) {
+				SendToScript(1, 0x004A, StringToSend, this.targetScriptName)
+				tried := 1 ;
+			}
+			sleep, 50
+			if (this.answer_isPaused = 1) {
+				this.answer_isPaused := 0 ;
+				result := this.answer_isPaused_content ;
+				this.answer_isPaused_content := 0 ;
+				return result ;
+			} else {
+				time_Now := A_TickCount ;
+				if (time_Now > time_Max) {
+					return "FAIL" ;
+				}
+			}
+		}
+	}
+	
+	isSuspended(timer, retry) {
+		StringToSend := this.myScriptName . separator . "isSuspended" . separator . "nill" . separator . "nill" ;
+		this.answer_isSuspended := 0 ;
+		time_Now := A_TickCount ;
+		time_Max := time_Now + timer ;
+		tried := 0 ;
+		while (1) {
+			if (retry = 1 or tried = 0) {
+				SendToScript(1, 0x004A, StringToSend, this.targetScriptName)
+				tried := 1 ;
+			}
+			sleep, 50
+			if (this.answer_isSuspended = 1) {
+				this.answer_isSuspended := 0 ;
+				result := this.answer_isSuspended_content ;
+				this.answer_isSuspended_content := 0 ;
+				return result ;
+			} else {
+				time_Now := A_TickCount ;
+				if (time_Now > time_Max) {
+					return "FAIL" ;
+				}
+			}
+		}
+	}
+	
 	receive_message(FirstArg, SecArg, ThirdArg, FourthArg) {
 		;FirstArg := From
 		;SecArg := Order
@@ -171,8 +249,21 @@ class Tunnel {
 		if (SecArg = "answer") {
 			if (ThirdArg = "runlabel") {
 				this.answer_runlabel := 1 ;
+				
 			} else  if (ThirdArg = "setvar") {
 				this.answer_setvar := 1 ;
+				
+			} else  if (ThirdArg = "getvar") {
+				this.answer_getvar := 1 ;
+				this.answer_getvar_content := FourthArg ;
+				
+			} else  if (ThirdArg = "isPaused") {
+				this.answer_isPaused := 1 ;
+				this.answer_isPaused_content := FourthArg ;
+				
+			} else  if (ThirdArg = "isSuspended") {
+				this.answer_isSuspended := 1 ;
+				this.answer_isSuspended_content := FourthArg ;
 			}
 		
 		} else if (SecArg = "runlabel") {
@@ -185,6 +276,18 @@ class Tunnel {
 		} else if (SecArg = "setvar") {
 			%ThirdArg% := FourthArg ;
 			StringToSend := this.myScriptName . separator . "answer" . separator . "setvar" . separator . "nill" ;
+			SendToScript(1, 0x004A, StringToSend, this.targetScriptName)
+			
+		} else if (SecArg = "getvar") {
+			StringToSend := this.myScriptName . separator . "answer" . separator . "getvar" . separator . %ThirdArg% ;
+			SendToScript(1, 0x004A, StringToSend, this.targetScriptName)
+			
+		} else if (SecArg = "isPaused") {
+			StringToSend := this.myScriptName . separator . "answer" . separator . "isPaused" . separator . A_IsPaused ;
+			SendToScript(1, 0x004A, StringToSend, this.targetScriptName)
+			
+		} else if (SecArg = "isSuspended") {
+			StringToSend := this.myScriptName . separator . "answer" . separator . "isSuspended" . separator . A_IsSuspended ;
 			SendToScript(1, 0x004A, StringToSend, this.targetScriptName)
 		}
 	}
